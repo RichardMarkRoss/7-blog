@@ -37,10 +37,17 @@ npm run preview
 
 # Day 1 (Wednesday, 3 hours)
 ## Objective: Initial Setup and Frontend Framework
-### Setup Development Environment:
+## Setup Development Environment:
 - [x] Install Nuxt.js and Vuetify.
 - [x] Set up a basic Nuxt.js project structure.
 - [x] Install necessary dependencies for Nuxt.js and Vuetify.
 ### Create Project Repository:
 - [x] Set up a Git repository.
 - [x] Commit initial setup and dependencies.
+
+## Objective: Basic Frontend Structure
+## Create Layouts and Pages:
+- [x] Set up the main layout for the platform.
+- [x] Create a homepage to display a list of blog posts.
+## Implement Routing:
+- [x] Define routes for the homepage and individual blog post pages.
