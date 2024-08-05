@@ -14,7 +14,8 @@
     "@nuxtjs/axios": "^5.13.6",
     "@nuxtjs/vuetify": "^1.12.3",
     "nuxt": "^3.12.4",
-    "vue": "latest"
+    "vue": "latest",
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
     "sass": "^1.77.8",

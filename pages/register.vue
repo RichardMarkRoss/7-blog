@@ -1,72 +1,45 @@
+<!-- pages/register.vue -->
 <template>
-    <v-container>
-      <v-row justify="center">
-        <v-col cols="12" md="8">
-          <v-card>
-            <v-card-title>Register</v-card-title>
-            <v-card-text>
-              <v-form @submit.prevent="register">
-                <v-text-field
-                  v-model="name"
-                  label="Name"
-                  required
-                ></v-text-field>
-                <v-text-field
-                  v-model="email"
-                  label="Email"
-                  type="email"
-                  required
-                ></v-text-field>
-                <v-text-field
-                  v-model="password"
-                  label="Password"
-                  type="password"
-                  required
-                ></v-text-field>
-                <v-text-field
-                  v-model="passwordConfirmation"
-                  label="Confirm Password"
-                  type="password"
-                  required
-                ></v-text-field>
-                <v-btn type="submit" color="primary">Register</v-btn>
-              </v-form>
-            </v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
-  </template>
-  
-  <script setup>
-  import { ref } from 'vue'
-  import { useRouter, useNuxtApp } from '#app'
-  
-  const { $api } = useNuxtApp()
-  const router = useRouter()
-  const name = ref('')
-  const email = ref('')
-  const password = ref('')
-  const passwordConfirmation = ref('')
-  
-  const register = async () => {
-    if (password.value !== passwordConfirmation.value) {
-      console.error('Passwords do not match')
-      return
+  <v-container>
+    <v-form v-model="valid">
+      <v-text-field label="Name" v-model="name" required></v-text-field>
+      <v-text-field label="Email" v-model="email" required></v-text-field>
+      <v-text-field label="Password" v-model="password" type="password" required></v-text-field>
+      <v-btn @click="register">Register</v-btn>
+    </v-form>
+  </v-container>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const name = ref('')
+const email = ref('')
+const password = ref('')
+const valid = ref(false)
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+
+const register = async () => {
+  try {
+    const response = await fetch('/api/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrfToken,
+      },
+      body: JSON.stringify({ name: name.value, email: email.value, password: password.value }),
+    })
+
+    if (response.ok) {
+      router.push('/login')
+    } else {
+      const error = await response.json()
+      alert('Registration failed: ' + (error.message || 'Unknown error'))
     }
-  
-    try {
-      const response = await $api.post('/register', {
-        name: name.value,
-        email: email.value,
-        password: password.value,
-        password_confirmation: passwordConfirmation.value
-      })
-      localStorage.setItem('token', response.data.token)
-      router.push('/')
-    } catch (error) {
-      console.error('Registration failed', error)
-    }
+  } catch (error) {
+    alert('Registration failed: ' + error.message)
   }
-  </script>
-  
+}
+</script>
