@@ -31,7 +31,8 @@ const login = async () => {
       localStorage.setItem('token', data.token)
       router.push('/')
     } else {
-      console.error('Login failed')
+      const errorData = await response.json()
+      console.error('Login failed:', errorData.message)
     }
   } catch (error) {
     console.error('Error logging in:', error)

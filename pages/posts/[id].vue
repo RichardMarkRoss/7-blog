@@ -9,7 +9,7 @@
           </v-card-text>
         </v-card>
         <v-alert v-else type="info" dismissible>
-          Loading post or post not found...
+          Loading post ...
         </v-alert>
       </v-col>
     </v-row>

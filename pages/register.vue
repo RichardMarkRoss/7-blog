@@ -40,7 +40,8 @@ const register = async () => {
       localStorage.setItem('token', data.token)
       router.push('/')
     } else {
-      console.error('Registration failed')
+      const errorData = await response.json()
+      console.error('Registration failed:', errorData.message)
     }
   } catch (error) {
     console.error('Error registering:', error)

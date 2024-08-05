@@ -1,66 +1,67 @@
 <template>
     <v-container>
-      <v-row justify="center">
-        <v-col cols="12" md="8">
-          <v-card>
-            <v-card-title>Profile</v-card-title>
-            <v-card-text>
-              <v-form @submit.prevent="updateProfile">
-                <v-text-field
-                  v-model="user.name"
-                  label="Name"
-                  required
-                ></v-text-field>
-                <v-text-field
-                  v-model="user.email"
-                  label="Email"
-                  type="email"
-                  required
-                ></v-text-field>
-                <v-btn type="submit" color="primary">Update Profile</v-btn>
-              </v-form>
-            </v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
+      <v-card>
+        <v-card-title>Profile</v-card-title>
+        <v-card-text>
+          <v-form @submit.prevent="updateProfile">
+            <v-text-field v-model="user.name" label="Name" required></v-text-field>
+            <v-text-field v-model="user.email" label="Email" disabled></v-text-field>
+            <v-text-field v-model="password" label="New Password" type="password"></v-text-field>
+            <v-btn type="submit" color="primary">Update Profile</v-btn>
+          </v-form>
+        </v-card-text>
+      </v-card>
     </v-container>
   </template>
   
   <script setup>
   import { ref, onMounted } from 'vue'
-  import { useFetch, useRouter } from '#app'
+  import { useRouter } from 'vue-router'
   import { useRuntimeConfig } from '#app'
-  import { useState } from '#app'
   
   const config = useRuntimeConfig()
   const router = useRouter()
-  const token = useState('token', () => null)
   const user = ref({ name: '', email: '' })
+  const password = ref('')
   
   const fetchUserProfile = async () => {
+    const token = localStorage.getItem('token')
     try {
-      const { data } = await useFetch(`${config.public.apiBaseUrl}/profile`, {
+      const response = await fetch(`${config.public.apiBaseUrl}/user`, {
         headers: {
-          Authorization: `Bearer ${token.value}`,
+          'Authorization': `Bearer ${token}`,
         },
       })
-      user.value = data.value
+      if (response.ok) {
+        user.value = await response.json()
+      } else {
+        console.error('Failed to fetch profile')
+      }
     } catch (error) {
-      console.error('Error fetching user profile:', error)
+      console.error('Error fetching profile:', error)
     }
   }
   
   const updateProfile = async () => {
+    const token = localStorage.getItem('token')
     try {
-      await fetch(`${config.public.apiBaseUrl}/profile`, {
+      const response = await fetch(`${config.public.apiBaseUrl}/user`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token.value}`,
+          'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(user.value),
+        body: JSON.stringify({
+          name: user.value.name,
+          password: password.value,
+        }),
       })
-      alert('Profile updated successfully!')
+      if (response.ok) {
+        console.log('Profile updated successfully')
+      } else {
+        const errorData = await response.json()
+        console.error('Failed to update profile:', errorData.message)
+      }
     } catch (error) {
       console.error('Error updating profile:', error)
     }

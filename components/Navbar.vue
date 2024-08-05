@@ -6,6 +6,7 @@
       <v-btn text to="/">Home</v-btn>
       <v-btn text to="/login" v-if="!isLoggedIn">Login</v-btn>
       <v-btn text to="/register" v-if="!isLoggedIn">Register</v-btn>
+      <v-btn text to="/profile" v-if="isLoggedIn">Profile</v-btn>
       <v-btn text @click="logout" v-if="isLoggedIn">Logout</v-btn>
     </v-app-bar>
     <v-main>

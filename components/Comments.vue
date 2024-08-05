@@ -1,7 +1,8 @@
 <template>
     <v-container>
+      <!-- Render comments and the form for adding a new comment -->
       <v-card v-for="comment in comments" :key="comment.id" class="mb-2">
-        <v-card-title>{{ comment.user.name }}</v-card-title>
+        <v-card-title>{{ comment.user?.name || 'Anonymous' }}</v-card-title>
         <v-card-text>{{ comment.content }}</v-card-text>
       </v-card>
       <v-form v-if="isLoggedIn" @submit.prevent="addComment">
@@ -15,8 +16,9 @@
   </template>
   
   <script setup>
-  import { ref, onMounted } from 'vue'
+  import { ref, onMounted, watch } from 'vue'
   import { useRuntimeConfig } from '#app'
+  import { useRoute } from 'vue-router'
   
   const config = useRuntimeConfig()
   const comments = ref([])
@@ -25,10 +27,18 @@
   const postId = ref(null)
   
   const fetchComments = async () => {
+    if (!postId.value) {
+      console.error('Post ID is not set.')
+      return
+    }
+  
     try {
+      console.log('Fetching comments for post:', postId.value)
       const response = await fetch(`${config.public.apiBaseUrl}/posts/${postId.value}/comments`)
       if (response.ok) {
-        comments.value = await response.json()
+        const data = await response.json()
+        console.log('Fetched comments:', data)
+        comments.value = data
       } else {
         console.error('Failed to fetch comments')
       }
@@ -38,6 +48,11 @@
   }
   
   const addComment = async () => {
+    if (!newComment.value.trim()) {
+      console.error('Comment content cannot be empty')
+      return
+    }
+  
     try {
       if (!isLoggedIn.value) {
         console.error('User is not authenticated')
@@ -45,6 +60,7 @@
       }
   
       const token = localStorage.getItem('token')
+      console.log('Submitting comment for post:', postId.value)
       const response = await fetch(`${config.public.apiBaseUrl}/posts/${postId.value}/comments`, {
         method: 'POST',
         headers: {
@@ -55,19 +71,27 @@
       })
   
       if (response.ok) {
+        console.log('Comment submitted successfully')
         newComment.value = ''
         await fetchComments()
       } else {
-        console.error('Failed to add comment')
+        const errorData = await response.json()
+        console.error('Failed to add comment:', errorData.message)
       }
     } catch (error) {
       console.error('Error adding comment:', error)
     }
   }
   
+  // Set postId value from route parameter or parent component
   onMounted(() => {
-    postId.value = postId // Assuming postId is passed as a prop
-    fetchComments()
+    const route = useRoute()
+    postId.value = route.params.id // Assuming postId is coming from route
+    if (postId.value) {
+      fetchComments()
+    } else {
+      console.error('Post ID is not available')
+    }
   })
   </script>
   
