@@ -13,7 +13,7 @@
         </v-alert>
       </v-col>
     </v-row>
-    <Comments v-if="post && post.id" :post-id="post.id" />
+    <Comments v-if="post" :post-id="post.id" />
   </v-container>
 </template>
 
@@ -30,16 +30,10 @@ const post = ref(null)
 const fetchPost = async () => {
   try {
     const response = await fetch(`${config.public.apiBaseUrl}/posts/${route.params.id}`)
-    if (!response.ok) {
-      console.error('Error fetching post:', await response.text())
-      return
-    }
-    const data = await response.json()
-    console.log('Fetched post data:', data) // Debugging line
-    if (data && data.id) {
-      post.value = data
+    if (response.ok) {
+      post.value = await response.json()
     } else {
-      console.error('No post data received or invalid data structure')
+      console.error('Failed to fetch post')
     }
   } catch (error) {
     console.error('Error fetching post:', error)

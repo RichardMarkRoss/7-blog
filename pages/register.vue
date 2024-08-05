@@ -1,11 +1,11 @@
-<!-- pages/register.vue -->
 <template>
   <v-container>
-    <v-form v-model="valid">
-      <v-text-field label="Name" v-model="name" required></v-text-field>
-      <v-text-field label="Email" v-model="email" required></v-text-field>
-      <v-text-field label="Password" v-model="password" type="password" required></v-text-field>
-      <v-btn @click="register">Register</v-btn>
+    <v-form @submit.prevent="register">
+      <v-text-field v-model="name" label="Name" required></v-text-field>
+      <v-text-field v-model="email" label="Email" required></v-text-field>
+      <v-text-field v-model="password" label="Password" type="password" required></v-text-field>
+      <v-text-field v-model="password_confirmation" label="Confirm Password" type="password" required></v-text-field>
+      <v-btn type="submit" color="primary">Register</v-btn>
     </v-form>
   </v-container>
 </template>
@@ -13,33 +13,37 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useRuntimeConfig } from '#app'
 
+const config = useRuntimeConfig()
 const router = useRouter()
 const name = ref('')
 const email = ref('')
 const password = ref('')
-const valid = ref(false)
-const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+const password_confirmation = ref('')
 
 const register = async () => {
   try {
-    const response = await fetch('/api/register', {
+    const response = await fetch(`${config.public.apiBaseUrl}/register`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': csrfToken,
-      },
-      body: JSON.stringify({ name: name.value, email: email.value, password: password.value }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name.value,
+        email: email.value,
+        password: password.value,
+        password_confirmation: password_confirmation.value,
+      }),
     })
 
     if (response.ok) {
-      router.push('/login')
+      const data = await response.json()
+      localStorage.setItem('token', data.token)
+      router.push('/')
     } else {
-      const error = await response.json()
-      alert('Registration failed: ' + (error.message || 'Unknown error'))
+      console.error('Registration failed')
     }
   } catch (error) {
-    alert('Registration failed: ' + error.message)
+    console.error('Error registering:', error)
   }
 }
 </script>
